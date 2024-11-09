@@ -1,5 +1,5 @@
 import * as express from 'express';
-import { User } from '../entities';
+import { User } from '../domain/entities';
 declare global {
   namespace Express {
     interface Request {

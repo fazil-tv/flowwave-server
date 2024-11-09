@@ -1,11 +1,11 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import authRout from './infrastructure/express/authroutes'
-import adminRout from './infrastructure/express/adminrouts'
-import userRout from './infrastructure/express/userRouts'
+import authRout from './interfaces/routes/authroutes'
+import adminRout from './interfaces/routes/adminrouts'
+import userRout from './interfaces/routes/userRouts'
 import cookieParser from 'cookie-parser';
-import { connectDB } from "./infrastructure/db";
+import { connectDB } from "./infrastructure/config";
 
 dotenv.config();
 
