@@ -39,8 +39,6 @@ const getProjectByIdUseCase = new GetProjectByIdUseCase(
 
 
 
-
-
 const projectController = new ProjectController(initiateProjectUseCase, getProjectsUseCase, getUserProjectsUseCase, getProjectByIdUseCase)
 
 
