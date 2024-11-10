@@ -4,7 +4,7 @@ import {UserController} from '../controllers'
 import { AdminController } from "../controllers";
 import { SignupUseCase } from "../../application/usecases/user";
 import { LoginUseCase } from "../../application/usecases/user";
-import { VerifyOtpUseCaseImpl } from "../../application/usecases/user";
+import { VerifyOtpUseCase } from "../../application/usecases/user";
 import { GoogleSignUpUseCase } from "../../application/usecases/user";
 
 import { SendOtp } from "../../application/usecases/user";
@@ -32,8 +32,10 @@ const sendOtpUseCase = new SendOtp(
     otpRepository
 );
 
-const VerifyOtpUseCase = new VerifyOtpUseCaseImpl(
+const verifyOtpUseCase = new VerifyOtpUseCase(
+    otpRepository,
     userRepository
+    
 );
 const googleSignUpUseCase = new GoogleSignUpUseCase(
     userRepository
@@ -42,7 +44,7 @@ const googleSignUpUseCase = new GoogleSignUpUseCase(
 
 
 
-const userController = new UserController(signupUseCase,loginUseCase,sendOtpUseCase,VerifyOtpUseCase,googleSignUpUseCase);
+const userController = new UserController(signupUseCase,loginUseCase,sendOtpUseCase,verifyOtpUseCase,googleSignUpUseCase);
 const adminController = new AdminController();
 
 

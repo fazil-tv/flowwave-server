@@ -33,6 +33,12 @@ export class LoginUseCase {
             return;
         }
 
+        if (!user.isVerified) {
+            console.log("User not found");
+            return;
+        }
+
+
         const isPasswordValid = await verifyPassword(password, user.password);
 
         if (!isPasswordValid) {

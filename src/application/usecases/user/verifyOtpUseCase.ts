@@ -1,49 +1,34 @@
-import VerifyOtpinterface from '../../../domain/repositories/interface/VerifyOtpinterface';
-import { UserRepository } from '../../../domain/repositories';
-import { generateToken , generateRefreshToken } from '../../../infrastructure/services';
+import { IOtpRepository } from '../../../domain/repositories';
+import { IUserRepository } from '../../../domain/repositories';
+import { generateToken, generateRefreshToken } from '../../../infrastructure/services';
+export class VerifyOtpUseCase{
+    private OtpRepository: IOtpRepository;
+    private UserRepository: IUserRepository;
 
+    constructor(OtpRepository: IOtpRepository,UserRepository:IUserRepository) {
 
-export class VerifyOtpUseCaseImpl implements VerifyOtpinterface {
-    private userRepository: UserRepository;
-
-    constructor(userRepository: UserRepository) {
-        this.userRepository = userRepository;
+        this.OtpRepository = OtpRepository;
+        this.UserRepository = UserRepository;
     }
 
-    async execute(email: string, otp: string): Promise<  any> {
+
+    async execute(email: string, otp: string): Promise<any> {
 
         try {
 
-            const user = await this.userRepository.getCurrentUser(email);
+            const { user, isValid } = await this.OtpRepository.executeOtpVerification(email, otp);
 
-     
-            if (!user || !user.otp) {
-                return false;
-            }
+            if (isValid) {
+                await this.UserRepository.updateUserOtpVerified(user._id);
+                const token = generateToken(email);
+                const refreshToken = generateRefreshToken(email);
 
-            const { value: storedOtpValue, expirationTime } = user.otp;
-
-            console.log('Stored OTP Value:', storedOtpValue);
-            console.log('Provided OTP:', otp);
-
-
-            if (storedOtpValue === otp && new Date() <= expirationTime) {
-
-                await this.userRepository.updateUserOtpVerified(user._id);
-
-                const token = generateToken((user._id as string).toString())
-             
-                const refreshToken = generateRefreshToken((user._id as string).toString())
-
-
-                return {
-                    refreshToken,
-                    token
-                };
+                return { token, refreshToken };
             } else {
-                return false
-            }
 
+                return false;
+                
+            }
         } catch (error) {
             console.error('Error verifying OTP:', error);
             return false;

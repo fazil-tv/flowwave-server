@@ -1,4 +1,4 @@
-export interface OTP {
-    value: string;
-    expirationTime: Date;
+export interface OtpDTO {
+    email: string;
+    otp: string;
 }

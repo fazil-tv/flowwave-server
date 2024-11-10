@@ -1,4 +1,4 @@
-import { OTP } from "./OTP";
+import { OtpDTO } from "./OTP";
 
 export interface UserDTO {
     _id?: any;
@@ -7,6 +7,6 @@ export interface UserDTO {
     profileImg: string | null
     password: string;
     isBlocked: boolean
-    otp?: OTP;
+    otp?: OtpDTO;
     isVerified: boolean; 
 }

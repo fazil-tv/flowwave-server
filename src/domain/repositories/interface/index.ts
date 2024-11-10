@@ -1,7 +1,5 @@
 export * from './userinterface'
 export * from './otpinterface'
-export * from './EmailServiceInterface'
-export * from './VerifyOtpinterface'
 export * from '../../../application/dtos/signupresponseinterface'
 export * from '../../../application/dtos/userSignupResponse'
 export * from './projectinterface'

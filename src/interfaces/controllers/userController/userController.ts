@@ -4,7 +4,7 @@ import {
     SignupUseCase,
     LoginUseCase,
     SendOtp,
-    VerifyOtpUseCaseImpl,
+    VerifyOtpUseCase,
     GoogleSignUpUseCase
 } from "../../../application/usecases/user"
 
@@ -13,10 +13,10 @@ export class UserController {
         private signupUseCase: SignupUseCase,
         private LoginUseCase: LoginUseCase,
         private sendOtpUseCase: SendOtp,
-        private verifyOtpUseCase: VerifyOtpUseCaseImpl,
+        private verifyOtpUseCase: VerifyOtpUseCase,
         private googleSignUpUseCase: GoogleSignUpUseCase
 
-    ) {}
+    ) { }
 
     async signup(req: Request, res: Response, next: NextFunction): Promise<void> {
 
@@ -28,14 +28,17 @@ export class UserController {
 
             const response = await this.signupUseCase.execute(username, email, password);
 
+            if (response.isVerified) {
 
-            console.log(response,)
+                res.status(400).json({ success: false, message: response.message });
+                return;
+            }
 
             const user = response.savedUser;
-            console.log(user);
 
             if (!user) {
                 res.status(400).json({ success: false, message: "User creation failed" });
+                return;
             }
 
             const otp = await this.sendOtpUseCase.execute(user);
@@ -43,7 +46,7 @@ export class UserController {
             console.log("OTP sent:", otp.value);
 
             if (user) {
-                res.status(200).json({ success: true, email:user.email});
+                res.status(200).json({ success: true, email: user.email });
 
             } else {
                 res.status(404).json({ success: false, message: 'User not found' });
@@ -62,18 +65,18 @@ export class UserController {
         const { email, password } = req.body;
         try {
             const user = await this.LoginUseCase.execute(email, password);
-            
+
 
             if (user) {
 
                 res.cookie('token', user.token, {
-                  
+
                     secure: process.env.NODE_ENV === 'production',
                     maxAge: 24 * 60 * 60 * 1000,
                 });
 
                 res.cookie('refreshToken', user.refreshtoken, {
-                  
+
                     secure: process.env.NODE_ENV === 'production',
                     maxAge: 7 * 24 * 60 * 60 * 1000,
                 });
@@ -105,28 +108,29 @@ export class UserController {
 
             const isValid = await this.verifyOtpUseCase.execute(verificationData.email, verificationData.otp);
 
+
             console.log(isValid, "isvalid");
 
             const token = isValid.token
             const refreshToken = isValid.refreshToken
-            
+
             if (isValid) {
                 res.cookie('token', isValid.token, {
-                
+
                     secure: process.env.NODE_ENV === 'production',
                     maxAge: 24 * 60 * 60 * 1000,
                 });
 
                 res.cookie('refreshToken', isValid.refreshToken, {
-                 
+
                     secure: process.env.NODE_ENV === 'production',
                     maxAge: 7 * 24 * 60 * 60 * 1000,
                 });
 
-                
-                res.status(200).json({ success: true, message: 'OTP verified successfully',token,refreshToken });
+
+                res.status(200).json({ success: true, message: 'OTP verified successfully', token, refreshToken });
             } else {
-                res.status(400).json({ success: false, message: 'Invalid OTP or email' });
+                res.status(400).json({ success: false, message: 'Invalid OTP' });
             }
 
         } catch (error) {
@@ -160,20 +164,20 @@ export class UserController {
                     console.log("goggle user", googleUser.token);
 
                     res.cookie('token', googleUser.token, {
-               
+
                         secure: process.env.NODE_ENV === 'production',
                         maxAge: 24 * 60 * 60 * 1000,
                     });
 
                     res.cookie('refreshToken', googleUser.refreshtoken, {
-                      
+
                         secure: process.env.NODE_ENV === 'production',
                         maxAge: 7 * 24 * 60 * 60 * 1000,
                     });
 
                     res.status(200).json({ success: true, googleUser });
 
-                }else{
+                } else {
                     res.status(404).json({ success: false, message: 'User not found' });
 
 
