@@ -1,12 +1,13 @@
 import nodemailer from 'nodemailer';
-import { EmailServiceInterface } from '../../../domain/repositories';
 import dotenv from 'dotenv';
 dotenv.config();
 
 
+export interface IEmailService {
+    sendOtpEmail(email: string, otp: string): Promise<void>;
+}
 
-export class NodemailerEmailService implements EmailServiceInterface {
-
+export class NodemailerEmailService implements IEmailService {
 
     private transporter;
 
@@ -21,6 +22,7 @@ export class NodemailerEmailService implements EmailServiceInterface {
     }
 
     async sendOtpEmail(email: string, otp: string): Promise<void> {
+
         const mailOptions = {
             from: 'farc348@gmail.com',
             to: email,
@@ -41,7 +43,7 @@ export class NodemailerEmailService implements EmailServiceInterface {
                 </div>
             `,
         };
-    
+
         try {
             await this.transporter.sendMail(mailOptions);
             console.log(`OTP email sent to ${email}`);
@@ -49,5 +51,5 @@ export class NodemailerEmailService implements EmailServiceInterface {
             console.error(`Error sending OTP email: ${error}`);
         }
     }
-    
+
 }

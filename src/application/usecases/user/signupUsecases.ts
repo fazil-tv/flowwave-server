@@ -27,15 +27,9 @@ export class SignupUseCase {
 
     const existingEmail = await this.userRepository.findByEmail(email);
 
-    
-    if (existingEmail) {
-      if (existingEmail.isVerified) {
-     
-      }
-    }
 
     if (existingEmail && existingEmail.isVerified) {
-      return { message: "User email is already registered and verified.", savedUser: existingEmail  };
+      return {  isVerified: true,  message: "User email is already registered and verified.", savedUser: existingEmail  };
     }
     
         const hashedPassword = await hashPassword(password);
