@@ -1,69 +1,30 @@
-import mongoose from 'mongoose';
-
+import { IProject, ProjectStatus, ProjectPriority } from '../../../application/interfaces/project.interface';
 import { IProjectRepository } from '../../../domain/repositories';
 import { IUserRepository } from '../../../domain/repositories';
-import { Project } from '../../../domain/entities';
-
-
-interface InitiateProjectDTO {
-    userId: string;
-    serviceId: string;
-    projectData: {
-        projectName: string;
-        projectDescription: string;
-        location: {
-            street: string;
-            city: string;
-            state: string;
-            country: string;
-            zip: string;
-        };
-    };
-}
 
 export class InitiateProjectUseCase {
 
     constructor(
         private projectRepository: IProjectRepository,
-        private userRepository: IUserRepository 
-    ) {}
-    
-    async execute({ userId, serviceId, projectData }: InitiateProjectDTO) {
+        private userRepository: IUserRepository
+    ) { }
 
-        const { Street, City, state, Country, Zip, ProjectName , Description } = projectData  as any;
-        if (!Street || !City || !state || !Country || !Zip) {
-            throw new Error("All location fields are required: street, city, state, country, zip.");
+    async execute(projectData: IProject): Promise<IProject> {
+
+        try {
+         
+            const existingProject = await this.projectRepository.findByName(projectData.projectName);
+            if (existingProject) {
+                throw new Error('Project name already exists');
+            }
+
+            const newProject = await this.projectRepository.create(projectData);
+            return newProject;
+
+        } catch (error: any) {
+            throw new Error(error.message);
         }
 
-        const location = {
-            street: Street,
-            city: City,
-            state: state,
-            country: Country,
-            zip: Zip
-        };
-
-
-    
-        const user = await this.userRepository.findById(userId);
-        if (!user) {
-            throw new Error("User not found");
-        }
-
-        
-        const project = new Project({
-            projectName: ProjectName,
-            userId: new mongoose.Types.ObjectId(userId),
-            projectDescription: Description,
-            location: location,
-            status: 'initiated',
-            phase: 'initiation',
-            serviceId:  new mongoose.Types.ObjectId(serviceId),
-        });
-
-       
-        await this.projectRepository.saveProject(project);
-
-        return project;
     }
-}
+
+    }

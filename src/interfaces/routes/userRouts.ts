@@ -44,7 +44,8 @@ const projectController = new ProjectController(initiateProjectUseCase, getProje
 
 
 router.post('/user/initiateproject', authMiddleware, (req, res) => {
-    projectController.initiateProject(req, res)
+   
+    projectController.createProject(req, res)
 
 });
 

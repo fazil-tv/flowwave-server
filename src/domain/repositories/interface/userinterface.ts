@@ -7,5 +7,6 @@ export interface IUserRepository {
     findByEmail(email:string):Promise<IUserData |null>;
     findById(userId: string): Promise<IUserData | null>;
     updateUserOtpVerified(userId: string): Promise<void>;
+    create(googleUser: Partial<IUserData>): Promise<IUserData>;
     save(user: User): Promise<User>
 }

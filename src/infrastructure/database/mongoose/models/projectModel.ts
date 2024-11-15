@@ -1,72 +1,41 @@
-import mongoose, { Schema, Document , ObjectId } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
+import { IProject, ProjectStatus, ProjectPriority } from '../../../../application/interfaces/project.interface';
+
+const projectSchema = new Schema<IProject>({
+  projectName: { type: String, required: true },
+  projectCode: { type: String, required: true, unique: true },
+  userId: { type: String, required: true },
+  description: { type: String, required: true },
+  status: { 
+    type: String, 
+    enum: Object.values(ProjectStatus),
+    default: ProjectStatus.NOT_STARTED 
+  },
+  priority: { 
+    type: String, 
+    enum: Object.values(ProjectPriority),
+    required: true 
+  },
+  startDate: { type: Date, required: true },
+  endDate: { type: Date, required: true },
+  completedAt: { type: Date },
+  progress: { type: Number, default: 0 },
+  tasks: [{ type: Schema.Types.ObjectId, ref: 'Task' }],
+  team: [{ type: Schema.Types.ObjectId, ref: 'TeamMember' }],
+  attachments: [{ type: String }],
+  tags: [{ type: String }],
+  isDeleted: { type: Boolean, default: false }
+}, {
+  timestamps: true,
+  toJSON: {
+    virtuals: true
+  }
+});
 
 
-export interface IProjectDocument extends Document {
-    _id: ObjectId;
-    projectName: string;
-    userId: mongoose.Types.ObjectId;
-    projectDescription: string;
-    totalBudget: number | null;
-    location: {
-        street: string;
-        city: string;
-        state: string;
-        country: string;
-        zip: string;
-    };
-    startDate: Date | null;
-    status: string;
-    endDate: Date | null;
-    phase: string;
-    serviceId:mongoose.Types.ObjectId;
-    assignedContractorId?: mongoose.Types.ObjectId;
-    reports?: {
-        reportDate: Date;
-        reportDetails: string;
-        reportFile: string;
-        reportStatus: string;
-        reportType: string;
-    }[];
-    contractorId?: mongoose.Types.ObjectId;
-    documents?: Date;
-}
 
+projectSchema.index({ userId: 1, isDeleted: 1 });
+projectSchema.index({ projectCode: 1 }, { unique: true });
+projectSchema.index({ status: 1 });
 
-const ProjectSchema: Schema = new Schema(
-    {
-        projectName: { type: String, required: true },
-        userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-        projectDescription: { type: String},
-        totalBudget: { type: Number, required: false },
-        location: {
-            street: { type: String, required: true },
-            city: { type: String, required: true },
-            state: { type: String, required: true },
-            country: { type: String, required: true },
-            zip: { type: String, required: true }
-        },
-        startDate: { type: Date },
-        status: { type: String, required: true, default: 'initiated' },
-        endDate: { type: Date },
-        phase: { type: String, required: true, default: 'initiation' },
-        serviceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Service', required: true },
-        assignedContractorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Contractor'},
-        reports: [
-            {
-                reportDate: { type: Date, required: true },
-                reportDetails: { type: String, required: true },
-                reportFile: { type: String, required: true },
-                reportStatus: { type: String, required: true },
-                reportType: { type: String, required: true }
-            }
-        ],
-        contractorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Contractor' },
-        documents: { type: Date},
-    },
-    {
-        timestamps: true, 
-    }
-);
-
-
-export const ProjectModel = mongoose.model<IProjectDocument>('Project', ProjectSchema);
+export const ProjectModel = mongoose.model<IProject>('Project', projectSchema);
