@@ -5,7 +5,7 @@ export interface OTP {
 }
 
 export interface IUserData {
-    _id?: any;
+    _id?: any ;
     username: string;
     email: string;
     profileImg: string | null

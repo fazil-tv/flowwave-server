@@ -11,7 +11,7 @@ export class GetProjectByIdUseCase {
     public async execute(id: string): Promise<Project | null> {
         try {
             const project = await this.projectRepository.findProjectById(id);
-            return project; 
+            return null; 
         } catch (error) {
             console.error('Error in GetProjectByIdUseCase:', error);
             throw new Error('Failed to fetch project');

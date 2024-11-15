@@ -10,7 +10,7 @@ import { GetProjectsUseCase } from '../../../application/usecases/projects/getpr
 import { GetUserProjectsUseCase } from '../../../application/usecases/projects';
 import { GetProjectByIdUseCase } from '../../../application/usecases/projects/GetProjectByIdUseCase';
 
-
+import { ProjectStatus, ProjectPriority } from '../../../application/interfaces/project.interface';
 
 export class ProjectController {
 
@@ -26,53 +26,94 @@ export class ProjectController {
 
 
 
-    public async initiateProject(req: Request, res: Response): Promise<void> {
 
+    public async createProject(req: Request, res: Response): Promise<void> {
         try {
 
-            const token = req.cookies.token;
+          
 
+            const token = req.cookies.token;
             if (!token) {
                 res.status(401).json({
                     success: false,
                     message: 'No authentication token provided',
                 });
+                return;
             }
 
-
             const secretKey = process.env.JWT_SECRET || 'muhammed';
-
             const decoded: any = jwt.verify(token, secretKey);
-
             const userId = decoded.id;
 
-
-
-            const { serviceId, ...projectData } = req.body;
-
-            console.log(serviceId, "serviceid")
-            console.log(userId, "userId")
-
-            const newProject = await this.initiateProjectUseCase.execute({ userId, serviceId, projectData });
-
-
-            console.log(newProject)
+    
+            const projectData = await this.validateAndFormatProjectData(req.body, userId);
+            console.log(projectData)
+            
+            const newProject = await this.initiateProjectUseCase.execute(projectData);
 
             res.status(201).json({
                 success: true,
-                message: 'Project initiated successfully',
+                message: 'Project created successfully',
+                data: newProject
             });
 
-        } catch (error) {
+        } catch (error: any) {
 
-            console.error('Error initiating project:', error);
-
-            res.status(500).json({
+            console.error('Error creating project:', error.message);
+            res.status(error.status || 500).json({
                 success: false,
-                message: 'Failed to initiate project',
+                message: error.message || 'Failed to create project',
             });
+
+        }
+    }
+
+    private async validateAndFormatProjectData(body: any, userId: string) {
+        const {
+            ProjectName,
+            Description,
+            ProjectLead,
+            Priority = ProjectPriority.MEDIUM,
+            StartDate,
+            EndDate,
+            tags = [],
+            team = [],
+        } = body;
+
+        console.log(body,"body")
+
+
+        if (!ProjectName || !Description || !StartDate || !EndDate || !ProjectLead) {
+            throw { status: 400, message: 'Missing required fields' };
         }
 
+     
+        const start = new Date(StartDate);
+        const end = new Date(EndDate);
+        if (end <= start) {
+            throw { status: 400, message: 'End date must be after start date' };
+        }
+
+       
+        const projectCode = `PRJ-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+
+        return {
+            projectName: ProjectName, 
+            projectCode,
+            ProjectLead,
+            userId,
+            description: Description, 
+            status: ProjectStatus.NOT_STARTED,
+            priority: Priority, 
+            startDate: start,
+            endDate: end,
+            progress: 0,
+            tasks: [], 
+            team, 
+            attachments: [],
+            tags,
+            isDeleted: false,
+        };
     }
 
 
@@ -81,7 +122,6 @@ export class ProjectController {
         try {
 
             const projects = await this.getProjectsUseCase.execute();
-
 
             res.status(200).json({
                 success: true,

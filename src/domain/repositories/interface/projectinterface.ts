@@ -1,8 +1,11 @@
-import { Project } from "../../entities";
+import {IProject} from '../../../application/interfaces/project.interface'
+
 
 export interface IProjectRepository {
-    getAllProjects(): Promise<Project[]>; 
-    saveProject(project: Project): Promise<Project>;
-    findProjectById(id: string): Promise<Project | null>;
-    getProjectsByUserId(userId: string): Promise<Project[]>
+    create(project: IProject): Promise<IProject>;
+    findByName(projectName: string): Promise<IProject | null>;
+    getAllProjects(): Promise<IProject[]>; 
+    saveProject(project: IProject): Promise<IProject>;
+    findProjectById(id: string): Promise<IProject | null>;
+    getProjectsByUserId(userId: string): Promise<IProject[]>;
 }
