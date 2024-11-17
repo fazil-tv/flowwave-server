@@ -3,6 +3,7 @@ import { IProject, ProjectStatus, ProjectPriority } from '../../../../applicatio
 
 const projectSchema = new Schema<IProject>({
   projectName: { type: String, required: true },
+  ProjectLead:{type:String,required:true},
   projectCode: { type: String, required: true, unique: true },
   userId: { type: String, required: true },
   description: { type: String, required: true },

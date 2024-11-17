@@ -13,7 +13,6 @@ export interface IUserData {
     isBlocked: boolean
     otp?: OTP;
     isVerified: boolean; 
-
 }
 
 export class User {

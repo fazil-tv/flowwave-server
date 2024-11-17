@@ -15,6 +15,7 @@ export enum ProjectStatus {
   export interface IProject {
     _id?: string;
     projectName: string;
+    ProjectLead:string
     projectCode: string;
     userId: string;
     description: string;

@@ -10,7 +10,11 @@ dotenv.config();
 export class LoginUseCase {
 
 
-    constructor(private loginRepository: IUserRepository) { }
+    constructor(
+        private loginRepository: IUserRepository,
+        
+
+    ) { }
 
     async execute(email: string, password: string): Promise<any> {
 
@@ -47,7 +51,6 @@ export class LoginUseCase {
         }
 
         const token = generateToken((user._id as string).toString())
-
         const refreshtoken = generateRefreshToken((user._id as string).toString())
 
         return { success: true, token, refreshtoken };

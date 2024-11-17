@@ -8,6 +8,7 @@ export class ProjectRepository {
 
     async create(projectData: IProject): Promise<IProject> {
         try {
+            console.log(projectData,"++++++++++++++++++++++")
             const project = new ProjectModel({
                 ...projectData,
                 status: ProjectStatus.NOT_STARTED,
@@ -18,6 +19,8 @@ export class ProjectRepository {
             });
             
             const savedProject = await project.save();
+
+            console.log(savedProject,"_-----------------")
             return savedProject.toObject();
         } catch (error) {
             throw new Error(`Error creating project: ${error}`);
