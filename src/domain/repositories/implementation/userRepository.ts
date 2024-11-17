@@ -1,10 +1,35 @@
 import { userModel, IUserData } from '../../../infrastructure/database';
 import { IUserRepository } from '../interface/userinterface';
 import { User } from '../../entities';
-import { Otp } from '../../entities';
+import { IPublicUserData } from '../../../application/interfaces';
 
 
 export class UserRepository implements IUserRepository {
+
+
+  async findPublicDataById(userId: string): Promise<IPublicUserData | null> {
+    try {
+      const user = await userModel.findById(userId)
+        .select({
+          username: 1,
+          profileImg: 1,
+          isVerified: 1,
+          email: 1,
+          _id: 1
+        })
+        .lean();
+      if (user) {
+        return {
+          ...user,
+          _id: user._id.toString(),
+        };
+      }
+
+      return null;
+    } catch (error) {
+      throw new Error("Error in db");
+    }
+  }
 
   async getAll(): Promise<IUserData[] | null> {
     try {
@@ -18,7 +43,7 @@ export class UserRepository implements IUserRepository {
   async findByEmail(email: string): Promise<IUserData | null> {
 
     try {
-      
+
       const user = await userModel.findOne({ email });
 
       if (!user) return null;
@@ -33,15 +58,15 @@ export class UserRepository implements IUserRepository {
 
   async findById(userId: string): Promise<IUserData | null> {
     try {
-      
-        const user = await userModel.findById(userId).exec();
-        return user; 
+
+      const user = await userModel.findById(userId).exec();
+      return user;
 
     } catch (error) {
       console.error("Error finding user by ID:", error);
-        return null;
+      return null;
     }
-}
+  }
 
 
 
@@ -61,9 +86,9 @@ export class UserRepository implements IUserRepository {
     try {
 
       const user = await userModel.findOne({ email }).exec();
-      if (!user) return null; 
+      if (!user) return null;
 
-      return user; 
+      return user;
 
     } catch (error) {
       console.error('Error retrieving current user:', error);
@@ -83,27 +108,27 @@ export class UserRepository implements IUserRepository {
   }
 
 
-  async create(googleUser: Partial<IUserData>): Promise<IUserData>  {
+  async create(googleUser: Partial<IUserData>): Promise<IUserData> {
     try {
-        if (!googleUser.email || !googleUser.password) {
-            throw new Error("Missing required fields: email or password");
-        }
+      if (!googleUser.email || !googleUser.password) {
+        throw new Error("Missing required fields: email or password");
+      }
 
-        const user = new userModel({
-            username: googleUser.username ?? 'Unknown',
-            email: googleUser.email,
-            phone: googleUser.phone ?? null,
-            profileImg: googleUser.profileImg ?? null,
-            password: googleUser.password,
-            isBlocked: googleUser.isBlocked ?? false,
-            otp: googleUser.otp ?? undefined 
-        });
+      const user = new userModel({
+        username: googleUser.username ?? 'Unknown',
+        email: googleUser.email,
+        phone: googleUser.phone ?? null,
+        profileImg: googleUser.profileImg ?? null,
+        password: googleUser.password,
+        isBlocked: googleUser.isBlocked ?? false,
+        otp: googleUser.otp ?? undefined
+      });
 
-        return await user.save();
+      return await user.save();
     } catch (error) {
       throw new Error(`Error creating new user: ${error}`);
     }
-}
+  }
 
 
 

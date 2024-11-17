@@ -2,7 +2,7 @@
 import { IUserRepository } from '../../../domain/repositories';
 import { User } from '../../../domain/entities';
 import { hashPassword } from '../../../infrastructure';
-import { userSignupResponse } from '../../dtos/userSignupResponse';
+import { userSignupResponse } from '../../dtos/auth/userSignupResponse';
 import { Types } from 'mongoose';
 
 

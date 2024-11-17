@@ -5,17 +5,18 @@ import {
     LoginUseCase,
     SendOtp,
     VerifyOtpUseCase,
-    GoogleSignUpUseCase
+    GoogleSignUpUseCase,
+    GetUserByIdUseCase
 } from "../../../application/usecases/user"
 
 export class UserController {
     constructor(
         private signupUseCase: SignupUseCase,
-        private LoginUseCase: LoginUseCase,
+        private loginUseCase: LoginUseCase,
         private sendOtpUseCase: SendOtp,
         private verifyOtpUseCase: VerifyOtpUseCase,
-        private googleSignUpUseCase: GoogleSignUpUseCase
-
+        private googleSignUpUseCase: GoogleSignUpUseCase,
+        private getUserByIdUseCase: GetUserByIdUseCase
     ) { }
 
     async signup(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -64,13 +65,12 @@ export class UserController {
 
         const { email, password } = req.body;
         try {
-            const user = await this.LoginUseCase.execute(email, password);
+            const user = await this.loginUseCase.execute(email, password);
 
 
             if (user) {
 
                 res.cookie('token', user.token, {
-
                     secure: process.env.NODE_ENV === 'production',
                     maxAge: 24 * 60 * 60 * 1000,
                 });
@@ -109,7 +109,7 @@ export class UserController {
             const isValid = await this.verifyOtpUseCase.execute(verificationData.email, verificationData.otp);
 
 
-            console.log(isValid, "isvalid");
+      
 
             const token = isValid.token
             const refreshToken = isValid.refreshToken
@@ -192,6 +192,11 @@ export class UserController {
         } catch (error) {
             next(error);
         }
+    }
+
+    async getUserById(req: Request, res: Response) {
+        const result = await this.getUserByIdUseCase.execute(req.params.id);
+        res.status(result.statusCode).json(result);
     }
 };
 

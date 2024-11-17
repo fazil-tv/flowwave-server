@@ -1,4 +1,4 @@
-import { OtpDTO } from "./OTP";
+import { OtpDTO } from "../auth/OtpResponseDto";
 
 export interface UserDTO {
     _id?: any;
