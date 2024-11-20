@@ -1,14 +1,13 @@
-// common/BaseResponseDto.ts
 export class BaseResponseDto<T> {
   constructor(
     public readonly success: boolean,
     public readonly data: T | null,
-    public readonly message?: string,
+    public readonly message: string,
     public readonly statusCode: number = 200,
     public readonly timestamp: number = Date.now()
   ) {}
 
-  static success<T>(data: T, message?: string): BaseResponseDto<T> {
+  static success<T>(data: T, message: string = 'Operation successful'): BaseResponseDto<T> {
     return new BaseResponseDto<T>(
       true,
       data,

@@ -13,7 +13,7 @@ import { OtpService } from "../../infrastructure/services";
 import { NodemailerEmailService } from "../../infrastructure/services";
 import { MongoOtpRepository } from "../../domain/repositories";
 import { SendOtp } from "../../application/usecases/user";
-
+import { UpdateProjectUseCase } from "../../application/usecases/projects";
 
 const projectRepository = new ProjectRepository();
 const userRepository = new UserRepository();
@@ -66,8 +66,11 @@ const getUserByIdUseCase = new GetUserByIdUseCase(
     userRepository
 );
 
+const updateProjectUseCase = new UpdateProjectUseCase(
+    projectRepository
+);
 
-const projectController = new ProjectController(initiateProjectUseCase, getProjectsUseCase, getUserProjectsUseCase, getProjectByIdUseCase)
+const projectController = new ProjectController(initiateProjectUseCase, getProjectsUseCase, getUserProjectsUseCase, getProjectByIdUseCase,updateProjectUseCase)
 
 const userController = new UserController(signupUseCase, loginUseCase, sendOtpUseCase, verifyOtpUseCase, googleSignUpUseCase, getUserByIdUseCase);
 
@@ -79,6 +82,14 @@ router.post('/user/initiateproject', authMiddleware, (req, res) => {
 });
 
 
+router.get('/user/getprojects', authMiddleware,
+    (req, res) => {
+        projectController.getUserProjects(req, res);
+    }
+)
+
+
+
 router.get('/user/:id',
     (req, res) => {
         userController.getUserById(req, res)
@@ -86,24 +97,25 @@ router.get('/user/:id',
 
 
 
-router.get('/user/getprojects', authMiddleware,
-    (req, res) => {
-        projectController.getAllProjects(req, res)
-    });
-
-
-router.get('/user/getuserprojects', authMiddleware,
-    (req, res) => {
-        console.log("routs was hited sucecessfully");
-        projectController.getUserProjects(req, res)
-
-    });
 
 router.get('/user/getproject/:id',
     (req, res) => {
+        console.log("routs was hited sucecessfully");
         projectController.getProjectById(req, res)
 
     });
+
+
+// router.patch('/user/projects/:id', authMiddleware,
+//     (req, res) => {
+//         projectController.updateProject(req, res);
+
+//     });
+
+
+router.patch('/user/projects/:id', authMiddleware, (req, res) => {  
+    projectController.updateProject(req, res);  
+});
 
 
 

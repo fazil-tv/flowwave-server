@@ -11,7 +11,7 @@ interface AuthenticatedRequest extends Request {
 const authMiddleware = async (req: any, res: Response, next: NextFunction) => {
   try {
 
-    
+  
     const token = req.cookies.token; 
 
     

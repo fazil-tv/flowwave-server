@@ -1,20 +1,12 @@
-import { ProjectRepository } from "../../../domain/repositories";
-import { Project } from '../../../domain/entities'; 
+import { IProjectRepository } from "../../../domain/repositories";
+
+import { IPublicProject } from "../../interfaces";
 
 export class GetProjectByIdUseCase {
-    private projectRepository: ProjectRepository;
+    constructor(private projectRepository: IProjectRepository) {}
 
-    constructor(projectRepository: ProjectRepository) {
-        this.projectRepository = projectRepository;
-    }
-
-    public async execute(id: string): Promise<Project | null> {
-        try {
-            const project = await this.projectRepository.findProjectById(id);
-            return null; 
-        } catch (error) {
-            console.error('Error in GetProjectByIdUseCase:', error);
-            throw new Error('Failed to fetch project');
-        }
+   
+    public async execute(id: string): Promise<IPublicProject[]> {
+          return await this.projectRepository.findProjectById(id);
     }
 }

@@ -1,13 +1,11 @@
 
 
 import { IProjectRepository } from "../../../domain/repositories";
-// import { Project } from '../../../domain/entities';
-import {IProject} from '../../../application/interfaces/project.interface'
-
+import { IPublicProject } from "../../interfaces";
 export class GetUserProjectsUseCase {
   constructor(private projectRepository: IProjectRepository) {}
 
-  async execute(userId: string): Promise<IProject[]> {
+  async execute(userId: string): Promise<IPublicProject[]> {
     return await this.projectRepository.getProjectsByUserId(userId);
   }
 }

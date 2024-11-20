@@ -1,10 +1,13 @@
+import { ObjectId } from "mongoose";
+import { Types } from "mongoose"
 import { IProject, ProjectStatus, ProjectPriority } from "../../application/interfaces/project.interface";
 
 export class Project implements IProject {
     _id?: string;
     projectName: string;
     projectCode: string;
-    userId: string;
+    ProjectLead: ObjectId;
+    userId: Types.ObjectId;
     description: string;
     status: ProjectStatus;
     priority: ProjectPriority;
@@ -12,7 +15,6 @@ export class Project implements IProject {
     endDate: Date;
     completedAt?: Date;
     progress: number;
-    budget?: number;
     tasks?: string[];
     team?: string[];
     attachments?: string[];
@@ -25,6 +27,7 @@ export class Project implements IProject {
       _id,
       projectName,
       projectCode,
+      ProjectLead,
       userId,
       description,
       status = ProjectStatus.NOT_STARTED,
@@ -39,6 +42,7 @@ export class Project implements IProject {
       this._id = _id;
       this.projectName = projectName!;
       this.projectCode = projectCode!;
+      this.ProjectLead = ProjectLead!;
       this.userId = userId!;
       this.description = description!;
       this.status = status;
