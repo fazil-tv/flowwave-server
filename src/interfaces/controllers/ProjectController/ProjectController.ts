@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
+import { ObjectId } from 'mongodb';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -9,8 +10,9 @@ import { InitiateProjectUseCase } from '../../../application/usecases/user';
 import { GetProjectsUseCase } from '../../../application/usecases/projects/getprojectusecase';
 import { GetUserProjectsUseCase } from '../../../application/usecases/projects';
 import { GetProjectByIdUseCase } from '../../../application/usecases/projects/GetProjectByIdUseCase';
-
+import { UpdateProjectUseCase } from '../../../application/usecases/projects/UpdateprojectUsecase';
 import { ProjectStatus, ProjectPriority } from '../../../application/interfaces/project.interface';
+import { BaseResponseDto } from '../../../application/dtos/common/BaseResponseDto';
 
 export class ProjectController {
 
@@ -20,7 +22,9 @@ export class ProjectController {
         private initiateProjectUseCase: InitiateProjectUseCase,
         private getProjectsUseCase: GetProjectsUseCase,
         private getUserProjectsUseCase: GetUserProjectsUseCase,
-        private getProjectByIdUseCase: GetProjectByIdUseCase
+        private getProjectByIdUseCase: GetProjectByIdUseCase,
+        private updateProjectUseCase: UpdateProjectUseCase
+
 
     ) { }
 
@@ -29,9 +33,6 @@ export class ProjectController {
 
     public async createProject(req: Request, res: Response): Promise<void> {
         try {
-
-          
-
             const token = req.cookies.token;
             if (!token) {
                 res.status(401).json({
@@ -45,10 +46,10 @@ export class ProjectController {
             const decoded: any = jwt.verify(token, secretKey);
             const userId = decoded.id;
 
-    
+
             const projectData = await this.validateAndFormatProjectData(req.body, userId);
             console.log(projectData)
-            
+
             const newProject = await this.initiateProjectUseCase.execute(projectData);
 
             res.status(201).json({
@@ -80,36 +81,36 @@ export class ProjectController {
             team = [],
         } = body;
 
-        console.log(body,"body")
+        console.log(body, "body")
 
 
         if (!ProjectName || !Description || !StartDate || !EndDate || !ProjectLead) {
             throw { status: 400, message: 'Missing required fields' };
         }
 
-     
+
         const start = new Date(StartDate);
         const end = new Date(EndDate);
         if (end <= start) {
             throw { status: 400, message: 'End date must be after start date' };
         }
 
-       
+
         const projectCode = `PRJ-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
 
         return {
-            projectName: ProjectName, 
+            projectName: ProjectName,
             projectCode,
             ProjectLead,
-            userId,
-            description: Description, 
+            userId: new ObjectId(userId),
+            description: Description,
             status: ProjectStatus.NOT_STARTED,
-            priority: Priority, 
+            priority: Priority,
             startDate: start,
             endDate: end,
             progress: 0,
-            tasks: [], 
-            team, 
+            tasks: [],
+            team,
             attachments: [],
             tags,
             isDeleted: false,
@@ -143,18 +144,19 @@ export class ProjectController {
     public async getProjectById(req: Request, res: Response): Promise<void> {
         try {
             const { id } = req.params;
+
+
+
             const project = await this.getProjectByIdUseCase.execute(id);
+
             if (!project) {
-                res.status(404).json({
-                    success: false,
-                    message: 'Project not found',
-                });
+                const response = BaseResponseDto.notFound('No projects found');
+                res.json(response);
                 return;
             }
-            res.status(200).json({
-                success: true,
-                project,
-            });
+            const response = BaseResponseDto.success(project);
+            res.json(response);
+
         } catch (error) {
             res.status(500).json({
                 success: false,
@@ -166,44 +168,72 @@ export class ProjectController {
 
     public async getUserProjects(req: any, res: Response): Promise<void> {
         try {
+            const user = req.user;
 
-            const user = req.user
+            console.log(user.id)
 
             if (!user) {
-                res.status(401).json({
-                    success: false,
-                    message: 'Unauthorized: No user found.',
-                });
-                return;
-            }
-            console.log(user);
-
-            const userId = user.id;
-            console.log(`User ID: ${userId}`);
-
-            const projects = await this.getUserProjectsUseCase.execute(userId);
-
-            if (!projects.length) {
-                res.status(404).json({
-                    success: false,
-                    message: 'No projects found for this user',
-                });
+                const response = BaseResponseDto.notFound('Unauthorized: No user found.');
+                res.json(response);
                 return;
             }
 
-            res.status(200).json({
-                success: true,
-                projects
-            });
+            const projects = await this.getUserProjectsUseCase.execute(user.id);
+
+            if (!projects || projects.length === 0) {
+
+                const response = BaseResponseDto.notFound('No projects found for this user');
+                res.json(response);
+                return;
+            }
+
+            const response = BaseResponseDto.success(projects);
+            res.json(response);
 
         } catch (error) {
-            console.error('Error fetching user projects:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Failed to fetch user projects',
-            });
+            const response = BaseResponseDto.error('An error occurred while fetching user projects');
+            res.json(response);
         }
     }
 
 
+    public async updateProject(req: any, res: Response): Promise<void> {
+        try {
+            const user = req.user;
+            const projectId = req.params.id;
+            const updateData = req.body;
+
+            if (!user) {
+                const response = BaseResponseDto.unauthorized('Unauthorized: No user found.');
+                res.status(response.statusCode).json(response);
+                return;
+            }
+
+            const result = await this.updateProjectUseCase.execute(
+                projectId,
+                updateData
+            );
+
+            if (!result.success) {
+                let statusCode = 400;
+                if (result.message.includes('not found')) {
+                    statusCode = 404;
+                }
+                res.status(statusCode).json(result);
+                return;
+            }
+
+    
+            res.status(result.statusCode).json(result);
+
+        } catch (error) {
+            console.error('Update Project Error:', error);
+            const response = BaseResponseDto.serverError('An error occurred while updating the project');
+            res.status(response.statusCode).json(response);
+        }
+    }
 }
+
+
+
+

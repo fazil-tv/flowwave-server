@@ -1,4 +1,4 @@
-import { IProject, ProjectStatus, ProjectPriority } from '../../../application/interfaces/project.interface';
+import { IProject } from '../../../application/interfaces/project.interface';
 import { IProjectRepository } from '../../../domain/repositories';
 import { IUserRepository } from '../../../domain/repositories';
 

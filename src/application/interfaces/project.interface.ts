@@ -1,3 +1,6 @@
+import { ObjectId } from "mongoose";
+import { Types } from 'mongoose';
+
 export enum ProjectStatus {
     NOT_STARTED = 'NOT_STARTED',
     IN_PROGRESS = 'IN_PROGRESS',
@@ -15,9 +18,9 @@ export enum ProjectStatus {
   export interface IProject {
     _id?: string;
     projectName: string;
-    ProjectLead:string
+    ProjectLead: ObjectId;
     projectCode: string;
-    userId: string;
+    userId: Types.ObjectId;
     description: string;
     status: ProjectStatus;
     priority: ProjectPriority;
