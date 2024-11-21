@@ -3,11 +3,12 @@ import { BaseResponseDto } from "../../dtos/common/BaseResponseDto";
 import { IProject } from "../../interfaces/project.interface";
 
 export class UpdateProjectUseCase {
-  constructor(private readonly projectRepository: IProjectRepository) {}
+  constructor(private readonly projectRepository: IProjectRepository) { }
 
   async execute(
     projectId: string,
-    updateData: Partial<IProject>
+    updateData: Partial<IProject>,
+    userId: string
   ): Promise<BaseResponseDto<IProject>> {
     try {
       const existingProjects = await this.projectRepository.findProjectById(projectId);
@@ -19,8 +20,8 @@ export class UpdateProjectUseCase {
       const currentProject = existingProjects[0];
 
       if (updateData.projectName && updateData.projectName !== currentProject.projectName) {
-        const existingProject = await this.projectRepository.findByName(updateData.projectName);
-        
+        const existingProject = await this.projectRepository.findByName(updateData.projectName, userId);
+
         if (existingProject) {
           return BaseResponseDto.error(`Project name '${updateData.projectName}' already exists.`);
         }
@@ -43,4 +44,15 @@ export class UpdateProjectUseCase {
       return BaseResponseDto.error('An error occurred while updating the project');
     }
   }
+
+  public async addTaskToProject(projectId: string, taskId: string): Promise<void> {  
+    try {  
+      await this.projectRepository.addTaskToProject(projectId, taskId);  // Call the repository method  
+    } catch (error) {  
+      console.error('Error updating project with task ID:', error);  
+      throw new Error('Failed to update project with task ID');  
+    }  
+  }  
+
+
 }
