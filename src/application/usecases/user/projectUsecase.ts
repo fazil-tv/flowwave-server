@@ -9,11 +9,13 @@ export class InitiateProjectUseCase {
         private userRepository: IUserRepository
     ) { }
 
-    async execute(projectData: IProject): Promise<IProject> {
+    async execute(projectData: IProject,userId:string): Promise<IProject> {
 
         try {
          
-            const existingProject = await this.projectRepository.findByName(projectData.projectName);
+            const existingProject = await this.projectRepository.findByName(projectData.projectName,userId);
+
+
             if (existingProject) {
                 throw new Error('Project name already exists');
             }

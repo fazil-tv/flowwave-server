@@ -14,6 +14,7 @@ import { NodemailerEmailService } from "../../infrastructure/services";
 import { MongoOtpRepository } from "../../domain/repositories";
 import { SendOtp } from "../../application/usecases/user";
 import { UpdateProjectUseCase } from "../../application/usecases/projects";
+import { GetProjectWithTasksUseCase } from "../../application/usecases/projects/GetProjectWithTasksUseCase";
 
 const projectRepository = new ProjectRepository();
 const userRepository = new UserRepository();
@@ -70,8 +71,11 @@ const updateProjectUseCase = new UpdateProjectUseCase(
     projectRepository
 );
 
-const projectController = new ProjectController(initiateProjectUseCase, getProjectsUseCase, getUserProjectsUseCase, getProjectByIdUseCase,updateProjectUseCase)
+const getProjectWithTasksUseCase = new GetProjectWithTasksUseCase(
+    projectRepository
+);
 
+const projectController = new ProjectController(initiateProjectUseCase, getProjectsUseCase, getUserProjectsUseCase, getProjectByIdUseCase,updateProjectUseCase ,getProjectWithTasksUseCase)
 const userController = new UserController(signupUseCase, loginUseCase, sendOtpUseCase, verifyOtpUseCase, googleSignUpUseCase, getUserByIdUseCase);
 
 
@@ -88,15 +92,11 @@ router.get('/user/getprojects', authMiddleware,
     }
 )
 
-
-
 router.get('/user/:id',
     (req, res) => {
+        
         userController.getUserById(req, res)
     })
-
-
-
 
 router.get('/user/getproject/:id',
     (req, res) => {
@@ -106,19 +106,16 @@ router.get('/user/getproject/:id',
     });
 
 
-// router.patch('/user/projects/:id', authMiddleware,
-//     (req, res) => {
-//         projectController.updateProject(req, res);
-
-//     });
-
-
 router.patch('/user/projects/:id', authMiddleware, (req, res) => {  
     projectController.updateProject(req, res);  
 });
 
 
-
+router.get('/:projectId', authMiddleware, (req, res) => {
+    console.log("routs was hited")
+    projectController.getProjectWithTasks(req, res);
+  });
+  
 
 
 export default router;

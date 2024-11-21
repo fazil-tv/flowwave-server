@@ -13,6 +13,8 @@ import { GetProjectByIdUseCase } from '../../../application/usecases/projects/Ge
 import { UpdateProjectUseCase } from '../../../application/usecases/projects/UpdateprojectUsecase';
 import { ProjectStatus, ProjectPriority } from '../../../application/interfaces/project.interface';
 import { BaseResponseDto } from '../../../application/dtos/common/BaseResponseDto';
+import { GetProjectWithTasksUseCase } from '../../../application/usecases/projects/GetProjectWithTasksUseCase';
+
 
 export class ProjectController {
 
@@ -23,7 +25,8 @@ export class ProjectController {
         private getProjectsUseCase: GetProjectsUseCase,
         private getUserProjectsUseCase: GetUserProjectsUseCase,
         private getProjectByIdUseCase: GetProjectByIdUseCase,
-        private updateProjectUseCase: UpdateProjectUseCase
+        private updateProjectUseCase: UpdateProjectUseCase,
+        private getProjectWithTasksUseCase: GetProjectWithTasksUseCase,
 
 
     ) { }
@@ -50,7 +53,7 @@ export class ProjectController {
             const projectData = await this.validateAndFormatProjectData(req.body, userId);
             console.log(projectData)
 
-            const newProject = await this.initiateProjectUseCase.execute(projectData);
+            const newProject = await this.initiateProjectUseCase.execute(projectData, userId);
 
             res.status(201).json({
                 success: true,
@@ -211,7 +214,8 @@ export class ProjectController {
 
             const result = await this.updateProjectUseCase.execute(
                 projectId,
-                updateData
+                updateData,
+                user
             );
 
             if (!result.success) {
@@ -223,12 +227,31 @@ export class ProjectController {
                 return;
             }
 
-    
             res.status(result.statusCode).json(result);
 
         } catch (error) {
             console.error('Update Project Error:', error);
             const response = BaseResponseDto.serverError('An error occurred while updating the project');
+            res.status(response.statusCode).json(response);
+        }
+    }
+
+
+    public async getProjectWithTasks(req: any, res: Response): Promise<void> {
+
+        const { projectId } = req.params;
+
+        try {
+            const result = await this.getProjectWithTasksUseCase.execute(projectId);
+
+            if (result.success) {
+                res.status(200).json(result.data);
+            } else {
+                res.status(404).json({ message: result.message });
+            }
+        } catch (error) {
+            console.error('Get Project with Tasks Error:', error);
+            const response = BaseResponseDto.serverError('An error occurred while fetching the project with tasks');
             res.status(response.statusCode).json(response);
         }
     }

@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import authRout from './interfaces/routes/authroutes'
 import adminRout from './interfaces/routes/adminrouts'
 import userRout from './interfaces/routes/userRouts'
+import taskRout from './interfaces/routes/taskroutes'
 import cookieParser from 'cookie-parser';
 import { connectDB } from "./infrastructure/config";
 
@@ -29,6 +30,7 @@ app.use(express.json());
 app.use("/api", authRout);
 app.use("/userapi", userRout);
 app.use("/adminapi", adminRout);
+app.use("/taskapi", taskRout);
 
 app.listen(PORT, async() => {
   await connectDB()

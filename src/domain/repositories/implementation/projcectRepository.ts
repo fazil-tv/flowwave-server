@@ -1,7 +1,8 @@
 import { IProject, ProjectStatus } from '../../../application/interfaces/project.interface'
 import { ProjectModel } from "../../../infrastructure/database";
 import { IPublicProject } from '../../../application/interfaces/';
-
+import { Types } from 'mongoose';
+import { IProjectBasic } from '../../../application/interfaces/project.basic.interfaces';
 
 export class ProjectRepository {
 
@@ -25,10 +26,13 @@ export class ProjectRepository {
         }
     }
 
-    async findByName(projectName: string): Promise<IProject | null> {
+
+    async findByName(projectName: string, userId: string): Promise<IProject | null> {
         try {
+            const userObjectId = new Types.ObjectId(userId);
             const project = await ProjectModel.findOne({
                 projectName,
+                userId: userObjectId,
                 isDeleted: false
             });
             return project ? project.toObject() : null;
@@ -135,31 +139,41 @@ export class ProjectRepository {
         }
     }
 
-    // async getProjectsByUserId(userId: string, includeDeleted: boolean = false): Promise<IPublicProject[]> {
-    //     try {
-    //         const conditions: any = {
-    //             userId: userId 
-    //         };
-    //         if (!includeDeleted) {
-    //             conditions.isDeleted = false;
-    //         }
 
-    //         const projects = await ProjectModel.find(conditions)
-    //             .sort({ createdAt: -1 }) 
-    //             .lean(); 
-
-    //         return projects;
-    //     } catch (error) {
-    //         console.error('Error getting projects by user ID:', error);
-    //         throw new Error('Failed to get user projects');
-    //     }
-    // }
+    async addTaskToProject(projectId: string, taskId: string): Promise<void> {
+        await ProjectModel.findByIdAndUpdate(
+            projectId,
+            { $addToSet: { tasks: taskId } },
+            { new: true }
+        ).exec();
+    }
 
 
-
-
-
-
+    async findProjectByIdWithTasks(projectId: string): Promise<IProjectBasic | null> {  
+        const project = await ProjectModel.findById(projectId)  
+            .select('projectName _id tasks')  
+            // .populate({  
+            //     path: 'tasks',  
+            // })  
+            .populate({  
+                path: 'tasks',  
+                populate: {
+                    path: 'assignee',
+                    select: 'username email' 
+                }  
+            })
+            .exec();  
+    
+        if (!project) {  
+            return null; 
+        }  
+     
+        return {  
+            projectName: project.projectName, 
+            _id: project._id.toString(), 
+            tasks: project.tasks || [], 
+        } as IProjectBasic;  
+    }
 
 
     // async softDeleteProject(id: string): Promise<boolean> {
