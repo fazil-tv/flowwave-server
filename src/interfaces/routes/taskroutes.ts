@@ -2,7 +2,7 @@ import { Router } from "express";
 const router = Router();
 import { TaskController } from "../controllers";
 import { TaskRepository } from "../../domain/repositories/implementation/task.repository";
-import { CreateTaskUseCase, UpdateTaskUseCase, DeleteTaskUseCase, GetProjectTasksUseCase ,} from "../../application/usecases/tasks";
+import { CreateTaskUseCase, UpdateTaskUseCase, DeleteTaskUseCase, GetProjectTasksUseCase, } from "../../application/usecases/tasks";
 import { ProjectRepository, UserRepository } from "../../domain/repositories";
 import authMiddleware from "../middleware/authMiddleware";
 import { UpdateProjectUseCase } from "../../application/usecases";
@@ -34,11 +34,19 @@ const updateProjectUseCase = new UpdateProjectUseCase(
 );
 
 
-const taskController = new TaskController(createTaskUseCase, getProjectTasksUseCase, deleteTaskUseCase,updateProjectUseCase)
 
-router.post('/tasks',authMiddleware, (req, res) => {
-    taskController.createTask(req,res)
+const taskController = new TaskController(createTaskUseCase, getProjectTasksUseCase, deleteTaskUseCase, updateProjectUseCase,updateTaskUseCase)
+
+router.post('/tasks', authMiddleware, (req, res) => {
+    taskController.createTask(req, res)
 })
+
+
+router.put('/tasks/:projectId', authMiddleware, (req, res) => {
+   
+    taskController.updateTask(req,res)
+})
+
 
 
 
