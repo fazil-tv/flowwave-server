@@ -6,7 +6,7 @@ export class UpdateProjectUseCase {
   constructor(private readonly projectRepository: IProjectRepository) { }
 
   async execute(
-    projectId: string,
+    projectId: string,  
     updateData: Partial<IProject>,
     userId: string
   ): Promise<BaseResponseDto<IProject>> {

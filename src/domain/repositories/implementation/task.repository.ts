@@ -10,7 +10,7 @@ import { ITaskRepository } from '../interface/task.interface'
 
 export class TaskRepository implements ITaskRepository {
 
-  async create(taskData: CreateTaskDTO, projectId: string,taskCode:string): Promise<ITask> {
+  async create(taskData: CreateTaskDTO, projectId: string, taskCode: string): Promise<ITask> {
     try {
       const task = new Task({
         ...taskData,
@@ -26,25 +26,25 @@ export class TaskRepository implements ITaskRepository {
     }
   }
 
-  async findTaskByNameInProject(taskName: string, projectId: string): Promise<ITask | null> {  
-    try {  
-      const task = await Task.findOne({   
+  async findTaskByNameInProject(taskName: string, projectId: string): Promise<ITask | null> {
+    try {
+      const task = await Task.findOne({
         name: {
-          $regex: new RegExp(`^${this.escapeRegex(taskName)}$`, 'i')  
-        },  
-        projectId: projectId,  
-        isDeleted: false  
-      });  
-  
-      return task ? task.toObject() : null; 
-    } catch (error) {  
-      console.error('Error finding task by name:', error);  
-      throw new Error(`Error finding task by name in project: ${error instanceof Error ? error.message : error}`);  
-    }  
-  }  
-  
-  private escapeRegex(text: string): string {  
-    return text.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');  
+          $regex: new RegExp(`^${this.escapeRegex(taskName)}$`, 'i')
+        },
+        projectId: projectId,
+        isDeleted: false
+      });
+
+      return task ? task.toObject() : null;
+    } catch (error) {
+      console.error('Error finding task by name:', error);
+      throw new Error(`Error finding task by name in project: ${error instanceof Error ? error.message : error}`);
+    }
+  }
+
+  private escapeRegex(text: string): string {
+    return text.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
   }
 
 
@@ -103,4 +103,11 @@ export class TaskRepository implements ITaskRepository {
       throw new Error(`Error soft deleting task: ${error}`);
     }
   }
+
+  async findByName(taskName: string, projectId: string): Promise<ITask | null> {
+    const taskDoc = await Task.findOne({ name: taskName, projectId }).exec();
+    return taskDoc ? taskDoc.toObject() as ITask : null; 
+  }
+
+
 }

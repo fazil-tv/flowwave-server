@@ -1,16 +1,19 @@
 import { Request, Response } from "express";
 import { BaseResponseDto } from "../../../application/dtos/common/BaseResponseDto";
 import { IPublicUserData } from "../../../application/interfaces";
-import { CreateTaskUseCase } from "../../../application/usecases/tasks";
+import { CreateTaskUseCase, UpdateTaskUseCase } from "../../../application/usecases/tasks";
 import { GetProjectTasksUseCase } from "../../../application/usecases/tasks";
 import { DeleteTaskUseCase } from "../../../application/usecases/tasks";
 import { UpdateProjectUseCase } from "../../../application/usecases";
+
 export class TaskController {
     constructor(
         private createTaskUseCase: CreateTaskUseCase,
         private getProjectTasksUseCase: GetProjectTasksUseCase,
         private deleteTaskUseCase: DeleteTaskUseCase,
         private updateProjectUseCase: UpdateProjectUseCase,
+        private updateTaskUseCase: UpdateTaskUseCase,
+
 
 
     ) { }
@@ -61,6 +64,27 @@ export class TaskController {
             res.status(response.statusCode).json(response);
         }
     }
+
+    public async updateTask(req: any, res: Response): Promise<void> {  
+        const user = req.user;  
+        if (!user) {  
+            const response = BaseResponseDto.unauthorized('Unauthorized: No user found.');  
+            res.status(response.statusCode).json(response);  
+            return;  
+        }  
+
+        const { projectId } = req.params; 
+        const taskId = req.body.taskId; 
+        const updateData = req.body.taskData;  
+
+        const result = await this.updateTaskUseCase.execute(taskId, projectId, updateData);  
+ 
+        if (result) {  
+            res.status(result.statusCode).json(result);  
+        } else {  
+            res.status(500).json(BaseResponseDto.error('Internal Server Error: Update failed.'));  
+        }  
+    } 
 
     // public async getTasksByProject(req: Request, res: Response): Promise<void> {
     //     try {

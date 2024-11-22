@@ -11,4 +11,6 @@ export interface ITaskRepository {
   delete(id: string): Promise<boolean>;
   softDelete(id: string): Promise<boolean>;
   findTaskByNameInProject(taskName: string, projectId: string): Promise<ITask | null>;
+  findByName(taskName: string, projectId: string): Promise<ITask | null>;
+
 }
