@@ -6,6 +6,7 @@ export interface CreateTaskDTO {
     description: string;
     projectId: string;
     priority: number;
+    progress:number;
     status: TaskStatus;
     startDate: Date;
     dueDate: Date;
@@ -18,6 +19,7 @@ export interface CreateTaskDTO {
     name?: string;
     description?: string;
     priority?: number;
+    progress:number;
     status?: TaskStatus;
     startDate?: Date;
     dueDate?: Date;

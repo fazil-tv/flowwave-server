@@ -6,7 +6,7 @@ import { CreateTaskUseCase, UpdateTaskUseCase, DeleteTaskUseCase, GetProjectTask
 import { ProjectRepository, UserRepository } from "../../domain/repositories";
 import authMiddleware from "../middleware/authMiddleware";
 import { UpdateProjectUseCase } from "../../application/usecases";
-
+import { ProjectProgressService } from "../../infrastructure/services/common/ProjectProgressServices";
 
 
 
@@ -16,11 +16,23 @@ const taskRepository = new TaskRepository();
 const projectRepository = new ProjectRepository();
 const userRepository = new UserRepository();
 
+
+const updateProjectUseCase = new UpdateProjectUseCase(
+    projectRepository
+);
+
+const progressService = ProjectProgressService.getInstance(
+    taskRepository,
+    projectRepository,
+    updateProjectUseCase 
+);
+
+
 const createTaskUseCase = new CreateTaskUseCase(
-    taskRepository, projectRepository
+    taskRepository, projectRepository,updateProjectUseCase
 );
 const updateTaskUseCase = new UpdateTaskUseCase(
-    taskRepository
+    taskRepository,projectRepository,updateProjectUseCase
 );
 const getProjectTasksUseCase = new GetProjectTasksUseCase(
     taskRepository
@@ -29,9 +41,7 @@ const deleteTaskUseCase = new DeleteTaskUseCase(
     taskRepository
 );
 
-const updateProjectUseCase = new UpdateProjectUseCase(
-    projectRepository
-);
+
 
 
 
