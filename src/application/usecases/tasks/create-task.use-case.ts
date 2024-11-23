@@ -2,8 +2,9 @@ import { ITaskRepository } from '../../../domain/repositories';
 import { CreateTaskDTO } from '../../dtos/user/TaskDTO';
 import { ITask } from "../../../application/interfaces/task.interface";
 import { IProjectRepository } from '../../../domain/repositories';
+import { ProjectProgressService } from '../../../infrastructure/services/common/ProjectProgressServices';
 
-
+import { UpdateProjectUseCase } from '../projects';
 
 interface CreateTaskResponse {  
     success: boolean;  
@@ -12,10 +13,19 @@ interface CreateTaskResponse {
 }  
 
 export class CreateTaskUseCase {
+    private progressService: ProjectProgressService;
+    
     constructor(
         private taskRepository: ITaskRepository,
-        private projectRepository: IProjectRepository
-    ) { }
+        private projectRepository: IProjectRepository,
+        private readonly updateProjectUseCase: UpdateProjectUseCase
+    ) { 
+        this.progressService = ProjectProgressService.getInstance(
+            taskRepository,
+            projectRepository,
+            updateProjectUseCase
+          );
+    }
 
     async execute(
         taskData: CreateTaskDTO,
@@ -46,6 +56,8 @@ export class CreateTaskUseCase {
             projectId,
             taskCode 
         );
+
+        await this.progressService.updateProjectProgress(projectId);
 
         return { success: true, task, message: 'Task created successfully' };
     }
