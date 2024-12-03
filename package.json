@@ -1,7 +1,7 @@
 {
   "scripts": {
     "build": "tsc",
-    "start": "ts-node-dev src/server.ts",
+    "server": "ts-node-dev src/server.ts",
     "test": "jest"
   },
   "dependencies": {
