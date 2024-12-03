@@ -152,16 +152,15 @@ export class UserController {
             if (token && token.access_token) {
                 const accessToken = token.access_token;
                 const token_type = token.token_type;
-                console.log("Access Token:", accessToken);
-                console.log(" token_type:", token_type);
+             
 
                 const googleUser = await this.googleSignUpUseCase.execute(accessToken, token_type);
 
-                console.log(googleUser, "googleUser");
+              
 
                 if (googleUser) {
 
-                    console.log("goggle user", googleUser.token);
+              
 
                     res.cookie('token', googleUser.token, {
 
@@ -175,7 +174,10 @@ export class UserController {
                         maxAge: 7 * 24 * 60 * 60 * 1000,
                     });
 
-                    res.status(200).json({ success: true, googleUser });
+                
+                    
+
+                    res.status(200).json({ success: true, googleUser});
 
                 } else {
                     res.status(404).json({ success: false, message: 'User not found' });

@@ -88,6 +88,7 @@ router.post('/user/initiateproject', authMiddleware, (req, res) => {
 
 router.get('/user/getprojects', authMiddleware,
     (req, res) => {
+        console.log("routs was hited sucecessfully");
         projectController.getUserProjects(req, res);
     }
 )

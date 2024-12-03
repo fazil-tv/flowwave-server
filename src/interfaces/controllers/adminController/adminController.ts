@@ -10,7 +10,6 @@ import { AdminLoginUseCase } from '../../../application/usecases/admin';
 export class AdminController {
     private adminLoginUseCase: AdminLoginUseCase;
     private userService: UserService;
-
     constructor() {
    
         this.adminLoginUseCase = new AdminLoginUseCase();
@@ -21,10 +20,7 @@ export class AdminController {
         try {
             const { email, password } = req.body;
 
-            console.log(email,"email","password",password)
             const tokens = this.adminLoginUseCase.login(email, password);
-
-            console.log(tokens,"token");
 
             if (tokens) {
                 res.cookie('access_admin_token', tokens.accessToken, {

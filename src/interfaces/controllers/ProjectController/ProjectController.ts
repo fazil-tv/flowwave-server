@@ -147,11 +147,7 @@ export class ProjectController {
     public async getProjectById(req: Request, res: Response): Promise<void> {
         try {
             const { id } = req.params;
-
-
-
             const project = await this.getProjectByIdUseCase.execute(id);
-
             if (!project) {
                 const response = BaseResponseDto.notFound('No projects found');
                 res.json(response);
