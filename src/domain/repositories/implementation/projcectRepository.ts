@@ -76,6 +76,7 @@ export class ProjectRepository {
                     projectName: 1,
                     description: 1,
                     ProjectLead: 1,
+                  
                     projectCode: 1,
                     startDate: 1,
                     endDate: 1,
@@ -105,6 +106,7 @@ export class ProjectRepository {
                     projectName: 1,
                     description: 1,
                     ProjectLead: 1,
+                    team:1,
                     projectCode: 1,
                     status: 1,
                     tags: 1,
@@ -115,6 +117,11 @@ export class ProjectRepository {
                 }
             )
                 .populate('ProjectLead', 'username')
+                .populate({
+                    path: 'team',
+                    model: 'Team', 
+                })
+
                 .lean();
 
             return project ? [project as unknown as IPublicProject] : [];
@@ -152,9 +159,7 @@ export class ProjectRepository {
     async findProjectByIdWithTasks(projectId: string): Promise<IProjectBasic | null> {  
         const project = await ProjectModel.findById(projectId)  
             .select('projectName _id tasks')  
-            // .populate({  
-            //     path: 'tasks',  
-            // })  
+       
             .populate({  
                 path: 'tasks',  
                 populate: {

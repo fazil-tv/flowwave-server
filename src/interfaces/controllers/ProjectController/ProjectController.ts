@@ -36,6 +36,7 @@ export class ProjectController {
 
     public async createProject(req: Request, res: Response): Promise<void> {
         try {
+
             const token = req.cookies.token;
             if (!token) {
                 res.status(401).json({
@@ -80,11 +81,11 @@ export class ProjectController {
             Priority = ProjectPriority.MEDIUM,
             StartDate,
             EndDate,
-            tags = [],
-            team = [],
+            Tags = [],
+            Team 
         } = body;
 
-        console.log(body, "body")
+       
 
 
         if (!ProjectName || !Description || !StartDate || !EndDate || !ProjectLead) {
@@ -101,6 +102,12 @@ export class ProjectController {
 
         const projectCode = `PRJ-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
 
+        const team: string[] = [];
+        if (Team) {
+            team.push(Team);
+        }
+    
+
         return {
             projectName: ProjectName,
             projectCode,
@@ -115,7 +122,7 @@ export class ProjectController {
             tasks: [],
             team,
             attachments: [],
-            tags,
+            Tags,
             isDeleted: false,
         };
     }
@@ -169,7 +176,7 @@ export class ProjectController {
         try {
             const user = req.user;
 
-            console.log(user.id)
+         
 
             if (!user) {
                 const response = BaseResponseDto.notFound('Unauthorized: No user found.');
