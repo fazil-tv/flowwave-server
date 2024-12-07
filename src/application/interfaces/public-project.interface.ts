@@ -6,6 +6,7 @@ export interface IPublicProject {
     projectName: string;
     description: string;
     ProjectLead: ObjectId;
+    team: string[];
     projectCode: string;
     priority: ProjectPriority;
     status: ProjectStatus;

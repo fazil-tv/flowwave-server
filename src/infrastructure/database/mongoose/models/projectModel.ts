@@ -22,7 +22,7 @@ const projectSchema = new Schema<IProject>({
   completedAt: { type: Date },
   progress: { type: Number, default: 0 },
   tasks: [{ type: Schema.Types.ObjectId, ref: 'Task' }],
-  team: [{ type: Schema.Types.ObjectId, ref: 'TeamMember' }],
+  team: [{ type: Schema.Types.ObjectId, ref: 'Team' }],
   attachments: [{ type: String }],
   tags: [{ type: String }],
   isDeleted: { type: Boolean, default: false }
