@@ -34,5 +34,7 @@ router.get('/members', authMiddleware, (req, res) => {
     memberController.getInvitedMembers(req,res)
 })
 
+
+
 export default router;
 

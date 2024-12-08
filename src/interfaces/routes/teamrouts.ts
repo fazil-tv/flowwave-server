@@ -33,7 +33,6 @@ router.get('/user-teams/:userId', (req,res)=>{
 });
 
 router.patch('/updateteam', authMiddleware,(req,res)=>{
-    console.log("kkkkkkkkkkkk")
     teamController.updateTeam(req,res)
 });
 

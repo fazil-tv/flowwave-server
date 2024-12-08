@@ -14,6 +14,8 @@ import { UpdateProjectUseCase } from '../../../application/usecases/projects/Upd
 import { ProjectStatus, ProjectPriority } from '../../../application/interfaces/project.interface';
 import { BaseResponseDto } from '../../../application/dtos/common/BaseResponseDto';
 import { GetProjectWithTasksUseCase } from '../../../application/usecases/projects/GetProjectWithTasksUseCase';
+import { GetProjectMembersUseCase } from '../../../application/usecases/members/getprojectmembersUsecases';
+import { Types } from 'mongoose';
 
 
 export class ProjectController {
@@ -27,6 +29,8 @@ export class ProjectController {
         private getProjectByIdUseCase: GetProjectByIdUseCase,
         private updateProjectUseCase: UpdateProjectUseCase,
         private getProjectWithTasksUseCase: GetProjectWithTasksUseCase,
+        private getProjectMembersUseCase: GetProjectMembersUseCase,
+
 
 
     ) { }
@@ -103,8 +107,19 @@ export class ProjectController {
         const projectCode = `PRJ-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
 
         const team: string[] = [];
-        if (Team) {
-            team.push(Team);
+        if (Team && Array.isArray(Team)) {
+           
+            const flattenedTeam = Array.isArray(Team[0]) 
+                ? Team[0] 
+                : Team;
+            
+            const uniqueTeamIds = [...new Set(
+                flattenedTeam.filter(id => 
+                    typeof id === 'string' && id.trim() !== ''
+                )
+            )];
+        
+            team.push(...uniqueTeamIds);
         }
     
 
@@ -258,6 +273,39 @@ export class ProjectController {
             res.status(response.statusCode).json(response);
         }
     }
+
+    async getProjectTeamMembers(req: Request, res: Response) {
+        try {
+          const projectId = new Types.ObjectId(req.params.projectId);
+          
+          const teamMembers = await this.getProjectMembersUseCase.execute(projectId);
+          
+          const response = BaseResponseDto.success(
+            teamMembers,
+            'Project team members retrieved successfully'
+          );
+          
+          return res.status(response.statusCode).json(response);
+        } catch (error) {
+          if (error instanceof Error) {
+           
+            if (error.message.includes('Invalid ObjectId')) {
+              const response = BaseResponseDto.badRequest('Invalid project ID format');
+              return res.status(response.statusCode).json(response);
+            }
+            
+            if (error.message.includes('Project not found')) {
+              const response = BaseResponseDto.notFound('Project not found');
+              return res.status(response.statusCode).json(response);
+            }
+          }
+          
+      
+          const response = BaseResponseDto.serverError('Error fetching project team members');
+          return res.status(response.statusCode).json(response);
+        }
+      }
+      
 }
 
 
