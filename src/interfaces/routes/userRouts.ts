@@ -15,6 +15,7 @@ import { MongoOtpRepository } from "../../domain/repositories";
 import { SendOtp } from "../../application/usecases/user";
 import { UpdateProjectUseCase } from "../../application/usecases/projects";
 import { GetProjectWithTasksUseCase } from "../../application/usecases/projects/GetProjectWithTasksUseCase";
+import { GetProjectMembersUseCase } from "../../application/usecases/members/getprojectmembersUsecases";
 
 const projectRepository = new ProjectRepository();
 const userRepository = new UserRepository();
@@ -37,6 +38,7 @@ const signupUseCase = new SignupUseCase(
     userRepository
 );
 
+
 const initiateProjectUseCase = new InitiateProjectUseCase(
     projectRepository, userRepository
 );
@@ -52,6 +54,8 @@ const getUserProjectsUseCase = new GetUserProjectsUseCase(
 const getProjectByIdUseCase = new GetProjectByIdUseCase(
     projectRepository
 );
+
+const getProjectMembersUseCase = new GetProjectMembersUseCase(projectRepository)
 
 const googleSignUpUseCase = new GoogleSignUpUseCase(
     userRepository
@@ -75,7 +79,7 @@ const getProjectWithTasksUseCase = new GetProjectWithTasksUseCase(
     projectRepository
 );
 
-const projectController = new ProjectController(initiateProjectUseCase, getProjectsUseCase, getUserProjectsUseCase, getProjectByIdUseCase,updateProjectUseCase ,getProjectWithTasksUseCase)
+const projectController = new ProjectController(initiateProjectUseCase, getProjectsUseCase, getUserProjectsUseCase, getProjectByIdUseCase,updateProjectUseCase ,getProjectWithTasksUseCase,getProjectMembersUseCase)
 const userController = new UserController(signupUseCase, loginUseCase, sendOtpUseCase, verifyOtpUseCase, googleSignUpUseCase, getUserByIdUseCase);
 
 
@@ -88,7 +92,7 @@ router.post('/user/initiateproject', authMiddleware, (req, res) => {
 
 router.get('/user/getprojects', authMiddleware,
     (req, res) => {
-        console.log("routs was hited sucecessfully");
+  
         projectController.getUserProjects(req, res);
     }
 )
@@ -101,7 +105,7 @@ router.get('/user/:id',
 
 router.get('/user/getproject/:id',
     (req, res) => {
-        console.log("routs was hited sucecessfully");
+       
         projectController.getProjectById(req, res)
 
     });
@@ -117,6 +121,10 @@ router.get('/:projectId', authMiddleware, (req, res) => {
     projectController.getProjectWithTasks(req, res);
   });
   
+  router.get('/team-members/:projectId', (req, res) => {
+    projectController.getProjectTeamMembers(req, res)
+  }
+  );
 
 
 export default router;

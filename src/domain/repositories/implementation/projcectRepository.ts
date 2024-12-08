@@ -3,6 +3,22 @@ import { ProjectModel } from "../../../infrastructure/database";
 import { IPublicProject } from '../../../application/interfaces/';
 import { Types } from 'mongoose';
 import { IProjectBasic } from '../../../application/interfaces/project.basic.interfaces';
+import { ProjectMemberDTO } from '../../../application/dtos/projects/getprojectmember';
+import { MemberModel } from "../../../infrastructure";
+// import { ITeam } from '../../../application/interfaces/team.interfaces';
+interface ITeam {
+    _id: Types.ObjectId;
+    TeamName: string;
+    memberIds: IMember[];
+  }
+  
+  interface IMember {
+    _id: Types.ObjectId;
+    name: string;
+    email: string;
+  }
+
+
 
 export class ProjectRepository {
 
@@ -154,8 +170,7 @@ export class ProjectRepository {
             { new: true }
         ).exec();
     }
-
-
+    
     async findProjectByIdWithTasks(projectId: string): Promise<IProjectBasic | null> {  
         const project = await ProjectModel.findById(projectId)  
             .select('projectName _id tasks')  
@@ -179,6 +194,88 @@ export class ProjectRepository {
             tasks: project.tasks || [], 
         } as IProjectBasic;  
     }
+
+
+    async getProjectMembers(projectId: Types.ObjectId): Promise<ProjectMemberDTO[]> {
+        try {
+          const project = await ProjectModel.findById(projectId)
+            .populate<{ team: ITeam[] }>({
+              path: 'team',
+              model: 'Team',
+              populate: {
+                path: 'memberIds',
+                model: 'Member',
+                select: '_id name email' 
+              }
+            });
+      
+          if (!project) {
+            throw new Error('Project not found');
+          }
+      
+          // Create a map to store unique members
+          const membersMap = new Map<string, ProjectMemberDTO>();
+      
+          // Process team members
+          for (const team of project.team) {
+            const teamMembers = team.memberIds || [];
+      
+            for (const member of teamMembers) {
+              const memberId = member._id.toString();
+              const existingMember = membersMap.get(memberId);
+              
+              if (existingMember) {
+                const teamExists = existingMember.teams.some(
+                  t => t.teamId.toString() === team._id.toString()
+                );
+                
+                if (!teamExists) {
+                  existingMember.teams.push({
+                    teamId: team._id,
+                    teamName: team.TeamName
+                  });
+                }
+              } else {
+                membersMap.set(memberId, {
+                  userId: member._id,
+                  name: member.name,
+                  email: member.email,
+                  teams: [{
+                    teamId: team._id,
+                    teamName: team.TeamName
+                  }]
+                });
+              }
+            }
+          }
+      
+          // Find and add project members not in teams
+          const projectMembers = await MemberModel.find({
+            projects: projectId,
+            _id: { $nin: Array.from(membersMap.keys()) }
+          });
+      
+          for (const member of projectMembers as unknown as IMember[]) {
+            membersMap.set(member._id.toString(), {
+              userId: member._id,
+              name: member.name,
+              email: member.email,
+              teams: []
+            });
+          }
+      
+          return Array.from(membersMap.values())
+            .sort((a, b) => a.name.localeCompare(b.name));
+      
+        } catch (error) {
+          console.error('Error fetching project members:', error);
+          throw new Error('Failed to retrieve project members');
+        }
+      }
+
+
+
+
 
 
     // async softDeleteProject(id: string): Promise<boolean> {
