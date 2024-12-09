@@ -6,8 +6,10 @@ import {
     SendOtp,
     VerifyOtpUseCase,
     GoogleSignUpUseCase,
-    GetUserByIdUseCase
+    GetUserByIdUseCase,
 } from "../../../application/usecases/user"
+import { UserProfileUseCase } from "../../../application/usecases/user/UserProfileUseCase";
+import { BaseResponseDto } from "../../../application/dtos/common/BaseResponseDto";
 
 export class UserController {
     constructor(
@@ -16,12 +18,16 @@ export class UserController {
         private sendOtpUseCase: SendOtp,
         private verifyOtpUseCase: VerifyOtpUseCase,
         private googleSignUpUseCase: GoogleSignUpUseCase,
-        private getUserByIdUseCase: GetUserByIdUseCase
-    ) { }
+        private getUserByIdUseCase: GetUserByIdUseCase,
+        private userProfileUseCase: UserProfileUseCase
+    ) {
+
+        this.uploadProfileImage = this.uploadProfileImage.bind(this);
+    }
+
 
     async signup(req: Request, res: Response, next: NextFunction): Promise<void> {
 
-        console.log(req.body);
 
         const { username, email, password } = req.body;
 
@@ -109,7 +115,7 @@ export class UserController {
             const isValid = await this.verifyOtpUseCase.execute(verificationData.email, verificationData.otp);
 
 
-      
+
 
             const token = isValid.token
             const refreshToken = isValid.refreshToken
@@ -152,15 +158,15 @@ export class UserController {
             if (token && token.access_token) {
                 const accessToken = token.access_token;
                 const token_type = token.token_type;
-             
+
 
                 const googleUser = await this.googleSignUpUseCase.execute(accessToken, token_type);
 
-              
+
 
                 if (googleUser) {
 
-              
+
 
                     res.cookie('token', googleUser.token, {
 
@@ -174,10 +180,10 @@ export class UserController {
                         maxAge: 7 * 24 * 60 * 60 * 1000,
                     });
 
-                
-                    
 
-                    res.status(200).json({ success: true, googleUser});
+
+
+                    res.status(200).json({ success: true, googleUser });
 
                 } else {
                     res.status(404).json({ success: false, message: 'User not found' });
@@ -196,9 +202,38 @@ export class UserController {
         }
     }
 
-    async getUserById(req: Request, res: Response) {
+    async getUserById(req: any, res: Response) {
         const result = await this.getUserByIdUseCase.execute(req.params.id);
         res.status(result.statusCode).json(result);
     }
+
+
+
+    async uploadProfileImage(req: any, res: Response) {
+        try {
+            const user = req.user?.id;
+            const file = req.file;
+    
+            if (!user) {
+                return res.status(401).json(BaseResponseDto.unauthorized('User not authenticated'));
+            }
+    
+            if (!file) {
+                return res.status(400).json(BaseResponseDto.badRequest('No file uploaded'));
+            }
+    
+            const normalizedPath = file.path.replace(/\\/g, '/');
+    
+            const result = await this.userProfileUseCase.execute(user, normalizedPath);
+    
+            return res.status(result.statusCode).json(result);
+        } catch (error) {
+            console.error("Controller Error:", error);
+            return res.status(500).json(BaseResponseDto.serverError());
+        }
+    }
+
+
+
 };
 

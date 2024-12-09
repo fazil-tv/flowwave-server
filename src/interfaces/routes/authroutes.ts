@@ -11,6 +11,7 @@ import { SendOtp } from "../../application/usecases/user";
 import { UserRepository, MongoOtpRepository } from "../../domain/repositories";
 import { OtpService } from "../../infrastructure/services";
 import { NodemailerEmailService } from "../../infrastructure/services";
+import { UserProfileUseCase } from "../../application/usecases/user/UserProfileUseCase";
 
 
 const emailService = new NodemailerEmailService();
@@ -47,8 +48,13 @@ const getUserByIdUseCase = new GetUserByIdUseCase(
     userRepository
 );
 
+const userProfileUseCase = new UserProfileUseCase(
+    userRepository
+);
 
-const userController = new UserController(signupUseCase, loginUseCase, sendOtpUseCase, verifyOtpUseCase, googleSignUpUseCase, getUserByIdUseCase);
+
+
+const userController = new UserController(signupUseCase, loginUseCase, sendOtpUseCase, verifyOtpUseCase, googleSignUpUseCase, getUserByIdUseCase,userProfileUseCase);
 
 const adminController = new AdminController();
 

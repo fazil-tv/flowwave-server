@@ -31,6 +31,16 @@ export class UserRepository implements IUserRepository {
     }
   }
 
+   async updateProfileImage(userId: string, imageUrl: string): Promise<IPublicUserData | null> {  
+    const updatedUser = await userModel.findByIdAndUpdate(  
+      userId,   
+      { profileImg: imageUrl },   
+      { new: true }  
+    );  
+
+    return updatedUser ? updatedUser.toPublicData() : null;  
+  }
+
   async getAll(): Promise<IUserData[] | null> {
     try {
       return await userModel.find();

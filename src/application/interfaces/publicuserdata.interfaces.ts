@@ -5,3 +5,5 @@ export interface IPublicUserData {
     profileImg: string | null;
     isVerified: boolean;
   }
+
+  
