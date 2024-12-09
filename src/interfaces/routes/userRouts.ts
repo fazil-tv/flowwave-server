@@ -1,5 +1,8 @@
 import { Router } from "express";
+import multer from 'multer';  
 const router = Router();
+const upload = multer({ dest: 'public/uploads/' });  
+
 import { ProjectController, UserController } from "../controllers";
 import authMiddleware from "../middleware/authMiddleware";
 import { InitiateProjectUseCase, LoginUseCase, SignupUseCase, VerifyOtpUseCase } from "../../application/usecases/user";
@@ -16,6 +19,9 @@ import { SendOtp } from "../../application/usecases/user";
 import { UpdateProjectUseCase } from "../../application/usecases/projects";
 import { GetProjectWithTasksUseCase } from "../../application/usecases/projects/GetProjectWithTasksUseCase";
 import { GetProjectMembersUseCase } from "../../application/usecases/members/getprojectmembersUsecases";
+import { UserProfileUseCase } from "../../application/usecases/user/UserProfileUseCase";
+
+
 
 const projectRepository = new ProjectRepository();
 const userRepository = new UserRepository();
@@ -33,6 +39,15 @@ const sendOtpUseCase = new SendOtp(
 const loginUseCase = new LoginUseCase(
     userRepository
 );
+
+
+const userProfileUseCase = new UserProfileUseCase(
+    userRepository
+);
+
+
+
+
 
 const signupUseCase = new SignupUseCase(
     userRepository
@@ -80,7 +95,7 @@ const getProjectWithTasksUseCase = new GetProjectWithTasksUseCase(
 );
 
 const projectController = new ProjectController(initiateProjectUseCase, getProjectsUseCase, getUserProjectsUseCase, getProjectByIdUseCase,updateProjectUseCase ,getProjectWithTasksUseCase,getProjectMembersUseCase)
-const userController = new UserController(signupUseCase, loginUseCase, sendOtpUseCase, verifyOtpUseCase, googleSignUpUseCase, getUserByIdUseCase);
+const userController = new UserController(signupUseCase, loginUseCase, sendOtpUseCase, verifyOtpUseCase, googleSignUpUseCase, getUserByIdUseCase,userProfileUseCase);
 
 
 router.post('/user/initiateproject', authMiddleware, (req, res) => {
@@ -125,6 +140,14 @@ router.get('/:projectId', authMiddleware, (req, res) => {
     projectController.getProjectTeamMembers(req, res)
   }
   );
+
+  
+  router.post('/profile-image', 
+    authMiddleware, 
+    upload.single('profileImage'), 
+    userController.uploadProfileImage
+  );
+
 
 
 export default router;
