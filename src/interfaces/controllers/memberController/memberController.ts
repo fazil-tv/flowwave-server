@@ -15,13 +15,13 @@ import { AcceptInvitationUseCase } from '../../../application/usecases/members/a
 
 export class MemberController {
 
-    
+
     constructor(
-        
-        private memberRepository : IMemberRepository,
+
+        private memberRepository: IMemberRepository,
         private inviteMemberUseCase: InviteMemberUseCase,
-        private getInvitedMembersUseCase:GetInvitedMembersUseCase,
-        private acceptInvitationUseCase:AcceptInvitationUseCase
+        private getInvitedMembersUseCase: GetInvitedMembersUseCase,
+        private acceptInvitationUseCase: AcceptInvitationUseCase
 
     ) { }
 
@@ -35,7 +35,7 @@ export class MemberController {
                 return res.status(401).json({ message: 'User not authenticated' });
             }
 
-            if (!name || !email || !projects || projects.length === 0) {
+            if (!name || !email) {
                 return res.status(400).json({ message: 'Invalid input: Name, email, and projects are required' });
             }
 
@@ -50,7 +50,7 @@ export class MemberController {
             const memberDTO: IMemberCreateDTO = {
                 name,
                 email,
-                projects,
+                projects: projects || [],
                 role: role || MemberRole.VIEWER,
                 status: MemberStatus.PENDING,
                 invitationToken: invitationTokens,
@@ -71,9 +71,9 @@ export class MemberController {
 
 
 
-     async acceptInvitation(req: any, res: Response) {
+    async acceptInvitation(req: any, res: Response) {
         try {
-            
+
             const { token } = req.body;
 
             if (!token) {
@@ -83,11 +83,11 @@ export class MemberController {
             const result = await this.acceptInvitationUseCase.execute(token);
 
 
-            // if (result.success) {
-            //     return res.status(200).json({ success: true, message: result });
-            // } else {
-            //     return res.status(400).json({ success: false, message: result });
-            // }
+            if (result.success) {
+                return res.status(200).json({ success: true, message: result });
+            } else {
+                return res.status(400).json({ success: false, message: result });
+            }
 
 
         } catch (error) {
@@ -99,24 +99,24 @@ export class MemberController {
 
     async getInvitedMembers(req: any, res: Response) {
         try {
-          const inviterId = req.user?.id; 
-          
-          if (!inviterId) {
-            return res.status(401).json({ message: 'Unauthorized' });
-          }
-    
-          const invitedMembers = await this.getInvitedMembersUseCase.execute(inviterId);
-          
-          res.status(200).json({
-            message: 'Invited members retrieved successfully',
-            data: invitedMembers
-          });
+            const inviterId = req.user?.id;
+
+            if (!inviterId) {
+                return res.status(401).json({ message: 'Unauthorized' });
+            }
+
+            const invitedMembers = await this.getInvitedMembersUseCase.execute(inviterId);
+
+            res.status(200).json({
+                message: 'Invited members retrieved successfully',
+                data: invitedMembers
+            });
         } catch (error) {
-          res.status(500).json({ 
-            message: 'Error retrieving invited members',
-            error: error instanceof Error ? error.message : 'Unknown error'
-          });
+            res.status(500).json({
+                message: 'Error retrieving invited members',
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
         }
-      }
+    }
 
 }
