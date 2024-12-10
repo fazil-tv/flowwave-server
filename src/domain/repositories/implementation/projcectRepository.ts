@@ -92,7 +92,6 @@ export class ProjectRepository {
                     projectName: 1,
                     description: 1,
                     ProjectLead: 1,
-                  
                     projectCode: 1,
                     startDate: 1,
                     endDate: 1,
@@ -103,7 +102,7 @@ export class ProjectRepository {
                 }
             )
                 .sort({ createdAt: -1 })
-                .populate('ProjectLead', 'username')
+               .populate('ProjectLead', 'username email profileImg')
                 .lean();
 
             return projects as unknown as IPublicProject[];
@@ -132,7 +131,7 @@ export class ProjectRepository {
                     progress: 1,
                 }
             )
-                .populate('ProjectLead', 'username')
+                .populate('ProjectLead', 'username email profileImg')
                 .populate({
                     path: 'team',
                     model: 'Team', 
